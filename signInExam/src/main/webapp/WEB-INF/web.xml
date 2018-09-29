@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>signInExam</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.html</url-pattern>
+    <url-pattern>*.jpg</url-pattern>
+    <url-pattern>*.gif</url-pattern>
+    <url-pattern>/js/*</url-pattern>
+    <url-pattern>/images/*</url-pattern>
+    <url-pattern>*.css</url-pattern>
+    <url-pattern>*.js</url-pattern>
+  </servlet-mapping>
+  
+  
+  <!-- post 方式的中文乱码解决 -->
+  <!-- spring在web环境下提供设置编码的过滤器，无需开发者自己创建指定编码的过滤器 -->
+	<filter>
+		<filter-name>characterEncoding</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>utf8</param-value>
+		</init-param>
+		<init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true </param-value>
+        </init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>characterEncoding</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- 配置HiddenHttpMethodFilter,将 post转为 put or delete提交方式 -->
+	<filter>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- 引入springmvc 核心控制器 -->
+	<servlet>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!-- 加载springmvc的配置文件 -->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<!-- classpath 表示 WEB-INF/classes -->
+			<param-value>classpath:springmvc.xml</param-value>
+		</init-param>
+		<!-- tomcat启动时，创建DispatcherServlet对象 -->
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<!-- /*是按照目录结构。*.do是按照后缀 /main 是具体资源路径 / 表示非后缀行路径 /mian /regist 表示所有的没有后缀的路径都会到达当前的servlet -->
+    <!-- 其实根据测试，/主要针对jsp后缀的文件，非jsp文件 -->
+	<servlet-mapping>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<!-- 引入spring的配置文件 -->
+	<!-- spring的核心配置 -->
+	<!-- ContextLoaderListener中初始化ioc容器， 自动读取bean所在文件的时候默认的路径是/WEB-INF/applicationContext.xml. 
+        我们可以通过以下修改来修改读取applicationContext.xml的路径 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<!-- 设置spring的配置文件的路径 -->
+		<param-value>classpath:spring.xml</param-value>
+		<!-- <param-value>/WEB-INF/classes/bean.xml</param-value> -->
+	</context-param>
+ <!-- 监听serviletcontext对象，application启动的时候自动ioc容器初始化 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+  
+</web-app>

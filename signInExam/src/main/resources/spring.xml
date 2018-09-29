@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+		
+	<!-- 强制spring aop使用cglib作为底层实现 spring实现aop的原理和技术选择： 如果一个目标对象有超类，那么默认会只使用jdk动态代理来实现 
+		如果一个目标对象有超类，我们也可以通过配置强制他使用cglib 如果一个目标对象没有超类，spring会使用cglib实现。 -->
+	
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- 开启注解 -->
+	<context:component-scan base-package="com.qfedu">
+	
+	</context:component-scan>
+
+
+	<!-- 之前我们写在mybatis_confgig中的配置， mappers也需要在这里进行配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		
+		<property name="dataSource" ref="dataSource" />
+		<!-- 自动扫描mapping.xml文件 -->
+		<property name="mapperLocations" value="classpath:com/qfedu/mapper/*.xml"></property>
+
+		<!-- 这里设置别名，只需要设置一个包的路径，会自动的按照包下的每一个类进行生成对应的别名，别名的名字就是类名的首字母小写全称 -->
+		<property name="typeAliasesPackage" value="com.qfedu.pojo" />
+		
+		<property name="configLocation" value="classpath:mybatis_config.xml"></property>
+		
+
+	</bean>
+
+
+
+	<!-- 初始化数据源,并且使用dbcp连接池，c3p0等连接池步骤相同 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3308/sign" />
+		<property name="username" value="root" />
+		<property name="password" value="wanglewangji" />
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="10"></property>
+		<!-- 连接池最大数量 -->
+		<property name="maxActive" value="20"></property>
+		<!-- 连接池最大空闲 -->
+		<property name="maxIdle" value="20"></property>
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="1"></property>
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="6000"></property>
+	</bean>
+	
+	
+
+	<!-- Mybatis MapperScannerConfigurer 自动扫描 将Mapper接口生成代理注入到Spring -->
+	<!-- 只需要修改basePackage的value为mybatis的接口存在的包， 当我们调用dao类型的时候，其实调用的是MapperScannerConfigurer对接口类的代理对象 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.qfedu.dao" />
+
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+	<!-- 表示支持注解方式的事务 -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- a PlatformTransactionManager is still required -->
+	<!-- 引入spring提供的事务管理器 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- (this dependency is defined somewhere else) -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	
+
+</beans>

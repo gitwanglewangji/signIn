@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>考勤信息</title>
+ <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+ <link rel="stylesheet" href="../css/easyui.css"/>
+    <link rel="stylesheet" href="../css/icon.css"/>
+    <link rel="stylesheet" href="../css/bootstrap.css"/>
+     <script src="../js/jquery.js"></script>
+    <script src="../js/easyui.js"></script>
+    <script src="../js/ckeditor/ckeditor.js"></script>
+<!-- <link rel="stylesheet" href="../layui/css/layui.css"  media="all">
+<script type="../layui/layui.all.js" charset="utf-8"></script> -->
+<script type="text/javascript">
+
+/* layui.use('table', function() {
+	var table = layui.table;
+	
+	table.render({
+		
+		elem:'#test'
+		,url:'SignList'
+		,cols: [[
+			{field:'id', width:80, title: 'ID', sort: true}
+		      //,{field:'username', width:180, title: '用户名'}
+		      ,{field:'signmorn', width:80, title: '上班签到', sort: true}
+		      ,{field:'signnight', width:80, title: '下班签到', sort: true}
+		      ,{field:'status', width:80, title: '状态', sort: true}
+		]]
+	});
+	
+}); */
+function init() {
+    $("#sginList").datagrid({
+  pagination:true,
+    
+      columns:[[
+      {field:"id",title:"id",checkbox:true},
+      {field:"signmorn",title:"上班签到",width:100},
+      {field:'signnight', width:80, title: '下班签到'},
+      {field:'status', width:80, title: '状态'}
+
+  ]],
+      toolbar:[
+      {text:"删除",iconCls:"icon-remove", handler:function () {
+              removeUser();
+          }},
+      {text:"签到",iconCls:"icon-add", handler:function () {
+              toAdd();
+          }},
+      {text:"修改",iconCls:"icon-edit", handler:function () {
+              toEdit();
+          }}
+  ]
+});
+fillData(1,2);
+}
+var  count = 0;
+function fillData(a,b) {
+  //获取总数量
+  $.get("../total", function (rs) {
+      // alert(rs);
+      count= rs;
+  });
+//异步发送请求，携带page,size两个参数,rs为findAllUser的返回值
+  $.get("../SignList",{page:a,size:b}, function(rs) {
+      // alert(rs);
+      //将数据填充到表格
+      $("#sginList").datagrid("loadData",rs);
+      var pager = $("#sginList").datagrid("getPager");
+      pager.pagination ({
+          total:count,
+          pageSize: b,
+          pageNumber: a,
+          pageList:[2,3,4,5],//尺寸范围
+          //翻页时调用
+          onSelectPage:function (page,size) {
+              fillData(page,size);
+          }
+          });
+
+  });
+}
+
+init();
+</script>
+
+<script type="text/javascript">
+
+</script>
+</head>
+<body>
+<table class="layui-hide" id="test"></table>
+<div id="sginList"></div>
+<div id="user_window" class="easyui-window" data-options="modal:true,closed:true" style="width: 400px;height:500px;">
+    <button onclick="saveUser()">保存</button>
+
+</div>
+<div>修改个人信息</div>
+<div>去签到</div>
+</body>
+</html>
